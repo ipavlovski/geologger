@@ -1,0 +1,12 @@
+:root {
+  --fg: hsl(0, 0%, 80%);
+  --bg: hsl(234, 60%, 7%);
+  --geologica: "Geologica", sans-serif;
+}
+
+
+body {
+  color: var(--fg);
+  background-color: var(--bg);
+  font-family: var(--geologica);
+}
