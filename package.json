@@ -1,10 +1,13 @@
 {
-  "name": "react-basic",
+  "name": "geologger",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite"
+    "build": "tsc -b && vite build",
+    "cf-typegen": "wrangler types",
+    "check": "tsc && vite build && wrangler deploy --dry-run",
+    "deploy": "wrangler deploy"
   },
   "packageManager": "pnpm@10.32.1",
   "dependencies": {
