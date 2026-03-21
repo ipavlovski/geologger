@@ -22,7 +22,11 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    "paths": {
+      "@client/*": ["./src/client/*"],
+    }
   },
-  "include": ["src", "main.tsx"]
+  "include": ["src", "src/client", "src/worker"]
 }
