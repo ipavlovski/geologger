@@ -1,5 +1,14 @@
 .container {
-  display: flex; 
+  display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: start;
+  padding: 1rem;
+}
+
+.card {
+  background-color: rgb(15, 42, 65);
+  border-radius: 1rem;
+  margin: .5rem;
+  padding: 1rem;
 }
