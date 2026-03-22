@@ -5,7 +5,6 @@ const app = new Hono<{ Bindings: Env }>()
 
 app.get("/api/", (c) => c.json({ name: "Cloudflare" }))
 
-
 // Accessing D1 is via the c.env.YOUR_BINDING property
 app.get("/query/beverages/:name", async (c) => {
   const customerName = c.req.param("name")
@@ -20,5 +19,6 @@ app.get("/query/beverages/:name", async (c) => {
     return c.json({ err: "Failed to query user" }, 500)
   }
 })
+
 
 export default app
