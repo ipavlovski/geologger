@@ -12,3 +12,17 @@
   margin: .5rem;
   padding: 1rem;
 }
+
+.copyright-style {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  background-color: hsla(0, 0%, 100%, .5);
+  padding: 0 5px;
+}
+
+.copyright-link {
+  text-decoration: none;
+  color: rgba(0, 0, 0, .75);
+  cursor: grab;
+}

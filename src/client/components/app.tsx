@@ -1,57 +1,115 @@
-import { useState } from 'react'
 import styles from './app.module.css'
 
-type Customer = {
-  CustomerId: number
-  CompanyName: string
-  ContactName: string
+import { DeckGL } from '@deck.gl/react'
+import { MapView } from '@deck.gl/core'
+import { TileLayer } from '@deck.gl/geo-layers'
+import { BitmapLayer, PathLayer } from '@deck.gl/layers'
+
+import type { Position, MapViewState } from '@deck.gl/core'
+import type { TileLayerPickingInfo, TileLayerProps } from '@deck.gl/geo-layers'
+import Buttons from './buttons'
+
+
+
+
+
+const INITIAL_VIEW_STATE: MapViewState = {
+  latitude: 47.65,
+  longitude: 7,
+  zoom: 4.5,
+  maxZoom: 20,
+  maxPitch: 89,
+  bearing: 0
 }
 
-export default function App() {
-
-  const [count, setCount] = useState(0)
-  const [name, setName] = useState("unknown")
-  const [rows, setRows] = useState<Customer[]>([])
+/* global window */
+const devicePixelRatio = (typeof window !== 'undefined' && window.devicePixelRatio) || 1
 
 
+function getTooltip({ tile }: TileLayerPickingInfo<any, any>) {
+  if (tile) {
+    const { x, y, z } = tile.index
+    return `tile: x: ${x}, y: ${y}, z: ${z}`
+  }
+  return null
+}
+
+
+function Copyright() {
   return (
-    <section className={styles.container}>
-      <h1>Hello World</h1>
-
-      <div className={styles.card}>
-        <button
-          onClick={() => setCount((count) => count + 1)}
-          aria-label="increment"
-        >
-          count is {count}
-        </button>
-      </div>
-      <div className={styles.card}>
-        <button
-          onClick={() => {
-            fetch("/api/")
-              .then((res) => res.json() as Promise<{ name: string }>)
-              .then((data) => setName(data.name))
-          }}
-          aria-label="get name"
-        >
-          Name from API is: {name}
-        </button>
-
-      </div>
-      <div className={styles.card}>
-        <button
-          onClick={() => {
-            fetch("/query/beverages/Bs%20Beverages")
-              .then((res) => res.json() as Promise<Customer[]>)
-              // .then(res => console.log(res))
-              .then((data) => setRows(data))
-          }}
-          aria-label="get name"
-        >
-          Date from DB: {rows.map(row => row.ContactName).join('\n')}
-        </button>
-      </div>
-    </section>
+    <div className={styles.copyrightStyle}>
+      {'© '}
+      <a className={styles.copyrightLink} href="http://www.openstreetmap.org/copyright" target="blank">
+        OpenStreetMap contributors
+      </a>
+    </div>
   )
 }
+
+
+type AppParams = {
+  showBorder?: boolean
+  onTilesLoad?: () => void
+}
+
+export default function App({ showBorder = true, onTilesLoad }: AppParams) {
+  const tileLayer = new TileLayer<ImageBitmap>({
+    // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
+    data: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+
+    // Since these OSM tiles support HTTP/2, we can make many concurrent requests
+    // and we aren't limited by the browser to a certain number per domain.
+    maxRequests: 20,
+
+    pickable: true,
+    onViewportLoad: onTilesLoad,
+    autoHighlight: showBorder,
+    highlightColor: [60, 60, 60, 40],
+    // https://wiki.openstreetmap.org/wiki/Zoom_levels
+    minZoom: 0,
+    maxZoom: 19,
+    tileSize: 256,
+    zoomOffset: devicePixelRatio === 1 ? -1 : 0,
+    renderSubLayers: props => {
+      const [[west, south], [east, north]] = props.tile.boundingBox
+      const { data, ...otherProps } = props
+
+      return [
+        new BitmapLayer(otherProps, {
+          image: data,
+          bounds: [west, south, east, north]
+        }),
+        showBorder &&
+        new PathLayer<Position[]>({
+          id: `${props.id}-border`,
+          data: [
+            [
+              [west, north],
+              [west, south],
+              [east, south],
+              [east, north],
+              [west, north]
+            ]
+          ],
+          getPath: d => d,
+          getColor: [255, 0, 0],
+          widthMinPixels: 4
+        })
+      ]
+    }
+  })
+
+  return (
+    <DeckGL
+      layers={[tileLayer]}
+      views={new MapView({ repeat: true })}
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      getTooltip={getTooltip}
+    >
+      <Buttons />
+      <Copyright />
+    </DeckGL>
+  )
+}
+
